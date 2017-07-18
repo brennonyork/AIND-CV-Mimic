@@ -21,8 +21,12 @@ detector.detectAllAppearance();
 
 // Unicode values for all emojis Affectiva can detect
 var emojis = [ 128528, 9786, 128515, 128524, 128527, 128521, 128535, 128539, 128540, 128542, 128545, 128563, 128561 ];
-var emojiToMatch = getRandomEmoji();
+var emojiToMatch = emojis[0];
 var hasFlipped = false;
+var scoreCorrect = 0;
+var scoreTotal = 1;
+var timerInterval = 8; // interval for how long to stay on a given emoji before flipping
+var timer = getTimeInSecs();
 
 // Update target emoji being displayed by supplying a unicode value
 function setTargetEmoji(code) {
@@ -76,7 +80,8 @@ function onReset() {
   $("#logs").html("");  // clear out previous log
 
   // TODO(optional): You can restart the game as well
-  // <your code here>
+    // <your code here>
+    resetGame();
 };
 
 // Add a callback to notify when camera access is allowed
@@ -133,10 +138,7 @@ detector.addEventListener("onImageResultsSuccess", function(faces, image, timest
     // Call functions to draw feature points and dominant emoji (for the first face only)
     drawFeaturePoints(canvas, image, faces[0]);
     drawEmoji(canvas, image, faces[0]);
-
-    // TODO: Call your function to run the game (define it first!)
-      // <your code here>
-      drawGame(canvas, image, faces[0]);
+    drawGame(canvas, image, faces[0]);
   }
 });
 
@@ -183,24 +185,55 @@ function drawEmoji(canvas, img, face) {
 // - Define an initialization/reset function, and call it from the "onInitializeSuccess" event handler above
 // - Define a game reset function (same as init?), and call it from the onReset() function above
 
+function resetGame() {
+    scoreCorrect = 0;
+    scoreTotal = 1;
+    setScore(scoreCorrect, scoreTotal);
+
+    emojiToMatch = emojis[0];
+    setTargetEmoji(emojiToMatch);
+
+    timer = getTimeInSecs() + timerInterval;
+}
+
+// Return a random emoji that is different from the previous as set by
+// emojiToMatch
 function getRandomEmoji() {
-    return emojis[Math.floor(Math.random() * emojis.length)];
+    var emojiIdx = emojis.indexOf(emojiToMatch);
+    var emojiClone = emojis.slice();
+    emojiClone.splice(emojiIdx, 1);
+
+    return emojiClone[Math.floor(Math.random() * emojiClone.length)];
+}
+
+function getTimeInSecs() {
+    return Math.floor(new Date().getTime() / 1000);
 }
 
 // <your code here>
 function drawGame(canvas, img, face) {
     var ctx = canvas.getContext('2d');
-
-    if ((Math.floor(new Date().getTime() / 1000)) % 3 == 0 && !hasFlipped) {
-	emojiToMatch = getRandomEmoji();
-	    setTargetEmoji(emojiToMatch);
-	hasFlipped = true;
-    } else {
-	hasFlipped = false;
-    }
+    var currTime = getTimeInSecs();
     
-  //ctx.font = '24px serif';
-  //ctx.fillText(face.emojis.dominantEmoji,
-//	       face.featurePoints[0].x + 200,
-//	       face.featurePoints[0].y - 100);
+    // compare your face to the known face
+    if (toUnicode(face.emojis.dominantEmoji) == emojiToMatch) {
+	// if you're making the same face, score a point :)
+	scoreCorrect += 1;
+	scoreTotal +=1;
+	setScore(scoreCorrect, scoreTotal);
+	// get a new emoji to match
+	emojiToMatch = getRandomEmoji();
+	setTargetEmoji(emojiToMatch);
+	timer = currTime + timerInterval;
+    }
+    // if we've passed our time from the timer and still haven't scored then
+    // switch the emoji
+    if (currTime > timer) {
+	emojiToMatch = getRandomEmoji();
+	setTargetEmoji(emojiToMatch);
+	timer = currTime + timerInterval;
+	// update the score
+	scoreTotal += 1;
+	setScore(scoreCorrect, scoreTotal);
+    }
 }
