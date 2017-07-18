@@ -172,19 +172,6 @@ function drawEmoji(canvas, img, face) {
 	       face.featurePoints[0].y - 100);
 }
 
-// TODO: Define any variables and functions to implement the Mimic Me! game mechanics
-
-// NOTE:
-// - Remember to call your update function from the "onImageResultsSuccess" event handler above
-// - You can use setTargetEmoji() and setScore() functions to update the respective elements
-// - You will have to pass in emojis as unicode values, e.g. setTargetEmoji(128578) for a simple smiley
-// - Unicode values for all emojis recognized by Affectiva are provided above in the list 'emojis'
-// - To check for a match, you can convert the dominant emoji to unicode using the toUnicode() function
-
-// Optional:
-// - Define an initialization/reset function, and call it from the "onInitializeSuccess" event handler above
-// - Define a game reset function (same as init?), and call it from the onReset() function above
-
 function resetGame() {
     scoreCorrect = 0;
     scoreTotal = 1;
@@ -210,7 +197,6 @@ function getTimeInSecs() {
     return Math.floor(new Date().getTime() / 1000);
 }
 
-// <your code here>
 function drawGame(canvas, img, face) {
     var ctx = canvas.getContext('2d');
     var currTime = getTimeInSecs();
